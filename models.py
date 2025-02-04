@@ -25,8 +25,7 @@ class Character(SQLModel, table=True):
     notes: Optional[str] = Field(default=None, index=True)
 
 
-    game_id: Optional[int] = Field(default=None, foreign_key="game.id")
-    game: Optional["game"] = Relationship(back_populates="characters")
+    
 
 
 class Actions(SQLModel, table=True):
@@ -37,7 +36,7 @@ class Actions(SQLModel, table=True):
     time: int
     damage: int
     attribute: str 
-    description
+    description: str
 
 class Weapons(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
@@ -55,4 +54,4 @@ class Game(SQLModel, table=True):
     chartes_pics: str #image
 
 
-    characters: List["Character"] = Relationship(back_populates="game")
+    
