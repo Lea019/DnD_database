@@ -1,6 +1,8 @@
-from typing import TYPE_CHECKING, Optional
-
+from typing import TYPE_CHECKING, Optional, Dict, List
+from sqlalchemy import Column
+from sqlalchemy.dialects.postgresql import JSON
 from sqlmodel import Field, Relationship, SQLModel
+from datetime import datetime
 
 
 
@@ -8,21 +10,29 @@ class Character(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     name: str = Field(index=True)
     c_class: str
-    attribute: str #list
+    #attributes:
+    strength: int = Field(gt=-5, le=30)
+    dexterity: int = Field(gt=-5, le=30)
+    consititution: int = Field(gt=-5, le=30)
+    intelligence: int = Field(gt=-5, le=30)
+    wisdom: int = Field(gt=-5, le=30)
+    charisma: int = Field(gt=-5, le=30)
+    
     image: str #link or fichier??
     max_hp: int
     current_hp: int
-    level: int
+    level: int = Field(gt=0)
     initiative: int
     defence: int
-    inventory: str
+    inventory: List[str] = Field(sa_column=Column(JSON))
+    
         
-    current_state: Optional[str] = Field(default=None, index=True)
-    damage_per_turn: Optional[int] = Field(default=None, index=True)
-    spell_in_action: Optional[str] = Field(default=None, index=True)
+    current_state: Optional[str] = Field(default=None)
+    damage_per_turn: Optional[int] = Field(default=None)
+    spell_in_action: Optional[str] = Field(default=None)
 
 
-    notes: Optional[str] = Field(default=None, index=True)
+    notes: Optional[str] = Field(default=None)
 
 
     
@@ -31,26 +41,26 @@ class Character(SQLModel, table=True):
 class Actions(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     a_type: str
-    name: str
-    a_range: int
-    time: int
+    name: str = Field(index=True)
+    a_range: str
+    time: str
     damage: int
-    attribute: str 
-    description: str
+    attribute: Optional[str] = Field(default=None)
+    description: Optional[str] = Field(default=None)
 
 class Weapons(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     w_type: str
-    name: str
+    name: str = Field(index=True)
     w_range: int
     damage: int
-    attribute: str 
+    attribute: Optional[str] = Field(default=None)
+    description: Optional[str] = Field(default=None)
 
 class Game(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     name: str = Field(index=True)
-    date: str
-    time: int
+    session_datetime: datetime
     chartes_pics: str #image
 
 

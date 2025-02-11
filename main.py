@@ -4,7 +4,7 @@ from .database import create_db_and_tables, engine
 from .models import Character, Player, Actions, Weapons, Game
 
 
-def create_heroes():
+def create_characters():
     with Session(engine) as session:
         
         w_sword = Weapons(
@@ -21,7 +21,7 @@ def create_heroes():
 
 def main():
     create_db_and_tables()
-    create_heroes()
+    create_characters()
 
 
 if __name__ == "__main__":
