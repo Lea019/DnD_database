@@ -1,7 +1,7 @@
 from sqlmodel import Session
 
-from .database import create_db_and_tables, engine
-from .models import Character, Player, Actions, Weapons, Game
+from database import create_db_and_tables, engine
+from models import Character, Player, Actions, Weapons, Game
 
 
 def create_characters():
