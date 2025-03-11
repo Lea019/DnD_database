@@ -1,10 +1,17 @@
 from sqlmodel import Session
+from fastapi import FastAPI
 
 from database import create_db_and_tables, engine
 from models import Character, Player, Actions, Weapons, Game
 
+app = FastAPI()
 
-def create_characters():
+@app.on_event("startup")
+def on_startup():
+    create_db_and_tables()
+
+@app.post("/weapon/")
+def create_weapon():
     with Session(engine) as session:
         
         w_sword = Weapons(
@@ -21,7 +28,7 @@ def create_characters():
 
 def main():
     create_db_and_tables()
-    create_characters()
+    create_weapon()
 
 
 if __name__ == "__main__":
