@@ -51,7 +51,7 @@ class Actions(SQLModel, table=True):
 class Weapons(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     w_type: str
-    name: str = Field(index=True)
+    w_name: str = Field(index=True)
     w_range: int
     damage: int
     attribute: Optional[str] = Field(default=None)
