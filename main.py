@@ -1,10 +1,13 @@
-from sqlmodel import Session
+from sqlmodel import Session, select
 from fastapi import FastAPI
 
 from database import create_db_and_tables, engine
 from models import Character, Player, Actions, Weapons, Game
 
 app = FastAPI()
+
+
+
 
 @app.on_event("startup")
 def on_startup():
@@ -14,43 +17,32 @@ def on_startup():
 
 def create_weapon():
     with Session(engine) as session:
-        
-        w_sword = Weapons(
-            w_type="physical", w_name="eh", w_range=1, damage= 4, attribute="Strength", description="something something something we win"
-        )
-
-        session.add(w_sword)
+        session.add()
         session.commit()
 
-        session.refresh(w_sword)
+        session.refresh()
 
-        print("Created weapon:", w_sword)
+        print("Created weapon:", )
 
 
-@app.post("/weapon/", response_model=Weapons)
-def create_weapon_user(weapon: Weapons):
+@app.post("/weapons/")
+def create_weapon_user(weapons: Weapons):
     with Session(engine) as session:
         session.add(weapon)
         session.commit()
         session.refresh(weapon)
         return weapon
 
-@app.get("/weapon/", response_model=list[Weapons])
-def read_weapons(weapon):
+@app.get("/weapons/", response_model=list[Weapons])
+def read_weapons():
     with Session(engine) as session:
         weapons = session.exec(select(Weapons)).all()
         return weapons
 
 @app.get("/")
 def read_root():
-    return {"message": "Hello, World!"}
+    return {"message": "Welcome to the DnD database!"}
 
-def main():
-    create_db_and_tables()
-    create_weapon()
-    
-    read_root()
-    
 
-if __name__ == "__main__":
-    main()
+
+
