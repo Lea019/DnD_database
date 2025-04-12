@@ -2,14 +2,13 @@
 
 * a faire:
     - changer les types
-    - lier les tables
-    - régler problèmes create
+    - lier les tables (fait?)
     - update instances
     - delete instances
 
 
 * problems:
-    - créer des instances ne fonctionne pas...
+    - get 1 instance: returns base template
 
 
 * questions:
@@ -17,5 +16,17 @@
     - mettre des images?
 
 
+Lancer le programme:
+commandes dans le terminal:
+    python -m venv .venv
+    source .venv/bin/activate
+    python -m pip install --upgrade pip
+    echo "*" > .venv/.gitignore
+    pip install sqlmodel
+    pip install fastapi uvicorn sqlmodel[asyncio] sqlalchemy aiosqlite
+    uvicorn main:app 
+ajouter /docs à la fin de l'url de la page de preview
 
-
+if need to recharge preview (modifications in the code f.e.):
+    pkill -f uvicorn
+    uvicorn main:app
