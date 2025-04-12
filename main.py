@@ -25,10 +25,10 @@ def create_character_user(*, session: Session = Depends(get_session), character:
     session.commit()
     session.refresh(db_characters)
     return db_characters
-@app.patch("/characters/{character_id}", response_model=CharactersPublic)
+@app.patch("/characters/{character_name}", response_model=CharactersPublic)
 def update_character(
-    *, session: Session = Depends(get_session), character_id: int, character: CharactersUpdate):
-    db_characters = session.get(Characters, character_id)
+    *, session: Session = Depends(get_session), character_name: str, character: CharactersUpdate):
+    db_characters = session.exec(select(Characters).where(Characters.name == character_name)).first()
     if not db_characters:
         raise HTTPException(status_code=404, detail="Character not found")
     character_data = character.model_dump(exclude_unset=True)
@@ -47,11 +47,11 @@ def create_action_user(*, session: Session = Depends(get_session), action: Actio
     session.commit()
     session.refresh(db_actions)
     return db_actions
-@app.patch("/actions/{action_id}", response_model=ActionsPublic)
+@app.patch("/actions/{action_name}", response_model=ActionsPublic)
 def update_action(
-    *, session: Session = Depends(get_session), action_id: int, action: ActionsUpdate
+    *, session: Session = Depends(get_session), action_name: str, action: ActionsUpdate
 ):
-    db_actions = session.get(Actions, action_id)
+    db_actions = session.exec(select(Actions).where(Actions.name == action_name)).first()
     if not db_actions:
         raise HTTPException(status_code=404, detail="Action not found")
     action_data = action.model_dump(exclude_unset=True)
@@ -70,7 +70,19 @@ def create_weapon_user(*, session: Session = Depends(get_session), weapon: Weapo
     session.commit()
     session.refresh(db_weapon)
     return db_weapon
-
+@app.patch("/weapons/{weapon_name}", response_model=WeaponsPublic)
+def update_weapon(
+    *, session: Session = Depends(get_session), weapon_name: str, weapon: WeaponsUpdate):
+    db_weapons = session.exec(select(Weapons).where(Weapons.name == weapon_name)).first()
+    if not db_weapons:
+        raise HTTPException(status_code=404, detail="Weapon not found")
+    weapon_data = weapon.model_dump(exclude_unset=True)
+    for key, value in weapon_data.items():
+        setattr(db_weapons, key, value)
+    session.add(db_weapons)
+    session.commit()
+    session.refresh(db_weapons)
+    return db_weapons
 
 @app.post("/games/", response_model=GamesPublic)
 def create_game_user(*, session: Session = Depends(get_session), game: GamesCreate):
@@ -79,7 +91,19 @@ def create_game_user(*, session: Session = Depends(get_session), game: GamesCrea
     session.commit()
     session.refresh(db_game)
     return db_game
-
+@app.patch("/games/{game_name}", response_model=GamesPublic)
+def update_game(
+    *, session: Session = Depends(get_session), game_name: str, game: GamesUpdate):
+    db_game = session.exec(select(Games).where(Games.name == game_name)).first()
+    if not db_game:
+        raise HTTPException(status_code=404, detail="Game not found")
+    game_data = game.model_dump(exclude_unset=True)
+    for key, value in game_data.items():
+        setattr(db_game, key, value)
+    session.add(db_game)
+    session.commit()
+    session.refresh(db_game)
+    return db_game
 
 @app.post("/sessions/", response_model=SessionsPublic)
 def create_session_user(*, session: Session = Depends(get_session), session_game: SessionsCreate):
@@ -88,6 +112,20 @@ def create_session_user(*, session: Session = Depends(get_session), session_game
     session.commit()
     session.refresh(db_session)
     return db_session
+@app.patch("/sessions/{session_name}", response_model=SessionsPublic)
+def update_session(
+    *, session: Session = Depends(get_session), session_name: str, session_game: SessionsUpdate):
+    db_session = session.exec(select(Sessions).where(Sessions.name == session_name)).first()
+    if not db_session:
+        raise HTTPException(status_code=404, detail="Session not found")
+    session_data = session_game.model_dump(exclude_unset=True)
+    for key, value in session_data.items():
+        setattr(db_session, key, value)
+    session.add(db_session)
+    session.commit()
+    session.refresh(db_session)
+    return db_session
+
 
 
 @app.post("/players/", response_model=SessionsPublic)
@@ -97,6 +135,20 @@ def create_player_user(*, session: Session = Depends(get_session), player: Playe
     session.commit()
     session.refresh(db_player)
     return db_player
+@app.patch("/players/{player_name}", response_model=PlayersPublic)
+def update_player(
+    *, session: Session = Depends(get_session), player_name: str, player: PlayersUpdate):
+    db_player = session.exec(select(Players).where(Players.name == player_name)).first()
+    if not db_player:
+        raise HTTPException(status_code=404, detail="Player not found")
+    player_data = player.model_dump(exclude_unset=True)
+    for key, value in player_data.items():
+        setattr(db_player, key, value)
+    session.add(db_player)
+    session.commit()
+    session.refresh(db_player)
+    return db_player
+
 
 
 @app.get("/characters/", response_model=list[CharactersPublic])
@@ -108,9 +160,9 @@ def read_characters(
 ):
     characters = session.exec(select(Characters).offset(offset).limit(limit)).all()
     return characters
-@app.get("/characters/{characters_id}", response_model=CharactersPublic)
-def read_character(*, session: Session = Depends(get_session),character_id: int):
-    character = session.get(CharactersPublic, characters_id)
+@app.get("/characters/{character_name}", response_model=CharactersPublic)
+def read_character(*, session: Session = Depends(get_session),character_name: str):
+    character = session.exec(select(Characters).where(Characters.name == character_name)).first()
     if not character:
         raise HTTPException(status_code=404, detail="Character not found")
     return character
@@ -124,9 +176,9 @@ def read_actions(*,
 ):
     actions = session.exec(select(Actions).offset(offset).limit(limit)).all()
     return actions
-@app.get("/actions/{action_id}", response_model=ActionsPublic)
-def read_action(*, session: Session = Depends(get_session),action_id: int):
-    action = session.get(Actions, action_id)
+@app.get("/actions/{action_name}", response_model=ActionsPublic)
+def read_action(*, session: Session = Depends(get_session),action_name: str):
+    action = session.exec(select(Actions).where(Actions.name == action_name)).first()
     if not action:
         raise HTTPException(status_code=404, detail="Action not found")
     return action
@@ -140,9 +192,9 @@ def read_weapons(*,
 ):
     weapons = session.exec(select(Weapons).offset(offset).limit(limit)).all()
     return weapons
-@app.get("/weapons/{weapon_id}", response_model=WeaponsPublic)
-def read_weapon(*, session: Session = Depends(get_session),weapon_id: int):
-    weapon = session.get(Weapons, weapon_id)
+@app.get("/weapons/{weapon_name}", response_model=WeaponsPublic)
+def read_weapon(*, session: Session = Depends(get_session),weapon_name: str):
+    weapon = session.exec(select(Weapons).where(Weapons.w_name == weapon_name)).first()
     if not weapon:
         raise HTTPException(status_code=404, detail="Weapon not found")
     return weapon
@@ -156,9 +208,9 @@ def read_games(*,
 ):
     games = session.exec(select(Games).offset(offset).limit(limit)).all()
     return games
-@app.get("/games/{game_id}", response_model=GamesPublic)
-def read_game(*, session: Session = Depends(get_session),game_id: int):
-    game = session.get(Games, game_id)
+@app.get("/games/{game_name}", response_model=GamesPublic)
+def read_game(*, session: Session = Depends(get_session),game_name: str):
+    game = session.exec(select(Games).where(Games.name == game_name)).first()
     if not game:
         raise HTTPException(status_code=404, detail="Game not found")
     return game
@@ -172,9 +224,9 @@ def read_sessions(*,
 ):
     sessions = session.exec(select(Sessions).offset(offset).limit(limit)).all()
     return sessions
-@app.get("/sessions/{session_id}", response_model=SessionsPublic)
-def read_session(*, session: Session = Depends(get_session), session_id: int):
-    session_game = session.get(Sessions, session_game)
+@app.get("/sessions/{session_date}", response_model=SessionsPublic)
+def read_session(*, session: Session = Depends(get_session), session_date: datetime):
+    session_game = session.exec(select(Sessions).where(Sessions.session_datetime == session_date)).first()
     if not session_game:
         raise HTTPException(status_code=404, detail="Session not found")
     return session_game
@@ -188,12 +240,23 @@ def read_players(*,
 ):
     players = session.exec(select(Players).offset(offset).limit(limit)).all()
     return players
-@app.get("/players/{player_id}", response_model=PlayersPublic)
-def read_player(*, session: Session = Depends(get_session), player_id: int):
-    player = session.get(Players, player_id)
+@app.get("/players/{player_name}", response_model=PlayersPublic)
+def read_player(*, session: Session = Depends(get_session), player_name: str):
+    player = session.exec(select(Players).where(Players.name == player_name)).first()
     if not player:
         raise HTTPException(status_code=404, detail="Player not found")
     return player
+
+
+@app.delete("/characters/{characters_id}")
+def delete_character(characters_id: int):
+    with Session(engine) as session:
+        character = session.get(Characters, characters_id)
+        if not character:
+            raise HTTPException(status_code=404, detail="Character not found")
+        session.delete(character)
+        session.commit()
+        return {"ok": True}
 
 
 @app.get("/")
