@@ -73,7 +73,7 @@ def create_weapon_user(*, session: Session = Depends(get_session), weapon: Weapo
 @app.patch("/weapons/{weapon_name}", response_model=WeaponsPublic)
 def update_weapon(
     *, session: Session = Depends(get_session), weapon_name: str, weapon: WeaponsUpdate):
-    db_weapons = session.exec(select(Weapons).where(Weapons.name == weapon_name)).first()
+    db_weapons = session.exec(select(Weapons).where(Weapons.w_name == weapon_name)).first()
     if not db_weapons:
         raise HTTPException(status_code=404, detail="Weapon not found")
     weapon_data = weapon.model_dump(exclude_unset=True)
