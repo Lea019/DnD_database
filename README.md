@@ -3,12 +3,13 @@
 * a faire:
     - changer les types
     - lier les tables (fait?)
-    - update instances
-    - delete instances
+    - get with either name or id
+    - lier les tables dans fastapi
+
 
 
 * problems:
-    - get 1 instance: returns base template
+
 
 
 * questions:

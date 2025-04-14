@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING, Optional, Dict, List
 from sqlalchemy import Column
 from sqlalchemy.dialects.postgresql import JSON
 from sqlmodel import Field, Session, SQLModel, create_engine, select, Relationship
-from datetime import datetime
+from datetime import date
 
 class GameCharacterLink(SQLModel, table=True):
     game_id: Optional[int] = Field(default=None, foreign_key="games.id", primary_key=True)
@@ -28,7 +28,10 @@ class GameSessionsLink(SQLModel, table=True):
     game_id: Optional[int] = Field(default=None, foreign_key="games.id", primary_key=True)
     session_id: Optional[int] = Field(default=None, foreign_key="sessions.id", primary_key=True)
    
-
+class SessionPlayerLink(SQLModel, table=True):
+    session_id: Optional[int] = Field(default=None, foreign_key="sessions.id", primary_key=True)
+    player_id: Optional[int] = Field(default=None, foreign_key="players.id", primary_key=True)
+    
 class CharactersBase(SQLModel):
     name: str = Field(index=True)
     c_class: str
@@ -100,26 +103,24 @@ class CharactersUpdate(SQLModel):
     
 
 class ActionsBase(SQLModel):
-    a_type: str
     name: str = Field(index=True)
+    a_type: str
     a_range: str
     time: str
     damage: int
     attribute: Optional[str] = Field(default=None)
     description: Optional[str] = Field(default=None)
-
 class Actions(ActionsBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True) 
 
     characters: List["Characters"] = Relationship(back_populates="actions", link_model=CharacterActionsLink)
-
 class ActionsCreate(ActionsBase):
     pass
 class ActionsPublic(ActionsBase):
     id: int
 class ActionsUpdate(SQLModel):
-    a_type: str | None = None
     name: str | None = None
+    a_type: str | None = None
     a_range: str | None = None
     time: str | None = None
     damage: int | None = None
@@ -127,25 +128,23 @@ class ActionsUpdate(SQLModel):
     description: str | None = None
 
 class WeaponsBase(SQLModel):
-    w_type: str
     w_name: str = Field(index=True)
+    w_type: str
     w_range: int
     damage: int
     attribute: Optional[str] = Field(default=None)
     description: Optional[str] = Field(default=None)
-
 class Weapons(WeaponsBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)  
 
-    characters: List["Characters"] = Relationship(back_populates="weapons", link_model=CharacterWeaponsLink)
- 
+    characters: List["Characters"] = Relationship(back_populates="weapons", link_model=CharacterWeaponsLink) 
 class WeaponsCreate(WeaponsBase):
     pass
 class WeaponsPublic(WeaponsBase):
     id: int
 class WeaponsUpdate(SQLModel):
-    w_type: str | None = None
     w_name: str | None = None
+    w_type: str | None = None
     w_range: int | None = None
     damage: int | None = None
     attribute: str | None = None
@@ -172,26 +171,29 @@ class GamesPublic(GamesBase):
     sessions: List["SessionsPublic"] = []
 class GamesUpdate(SQLModel):
     name: str | None = None
-    session_datetime: datetime | None = None
     chartes_pics: str | None = None
 
 
 class SessionsBase(SQLModel):
     name: str = Field(index=True)
-    session_datetime: datetime
+    session_date: date
+    notes: Optional[str] = Field(default=None)
 
 class Sessions(SessionsBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)  
 
+    players: List["Players"] = Relationship(back_populates="sessions", link_model=SessionPlayerLink)
     games: List["Games"] = Relationship(back_populates="sessions", link_model=GameSessionsLink)
 class SessionsCreate(SessionsBase):
     pass
 class SessionsPublic(SessionsBase):
     id: int
     games: List["GamesPublic"] = []
+    players: List["PlayersPublic"] = []
 class SessionsUpdate(SQLModel):
     name: str | None = None
-    session_datetime: datetime | None = None
+    session_date: date | None = None
+    notes: str | None = None
     
 
 
