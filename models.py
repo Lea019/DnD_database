@@ -58,6 +58,7 @@ class CharactersBase(SQLModel):
     notes: Optional[str] = Field(default=None)
 
     
+    
 class Characters(CharactersBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
 
@@ -65,13 +66,14 @@ class Characters(CharactersBase, table=True):
     players: List["Players"] = Relationship(back_populates="characters", link_model=PlayerCharacterLink)
     actions: List["Actions"] = Relationship(back_populates="characters", link_model=CharacterActionsLink)
     weapons: List["Weapons"] = Relationship(back_populates="characters", link_model=CharacterWeaponsLink)
-
+    
+ 
 class CharactersCreate(CharactersBase):
     pass
 class CharactersPublic(CharactersBase):
     id: int
     players: List["PlayersPublic"] = []
-    games: List["GamesPublic"] = []
+    games: List["GamesBase"] = []
     actions: List["ActionsPublic"] = []
     weapons: List["WeaponsPublic"] = []
 
@@ -166,7 +168,7 @@ class GamesCreate(GamesBase):
     pass
 class GamesPublic(GamesBase):
     id: int
-    characters: List["CharactersPublic"] = []
+    characters: List["CharactersBase"] = []
     players: List["PlayersPublic"] = []
     sessions: List["SessionsPublic"] = []
 class GamesUpdate(SQLModel):
@@ -184,6 +186,7 @@ class Sessions(SessionsBase, table=True):
 
     players: List["Players"] = Relationship(back_populates="sessions", link_model=SessionPlayerLink)
     games: List["Games"] = Relationship(back_populates="sessions", link_model=GameSessionsLink)
+
 class SessionsCreate(SessionsBase):
     pass
 class SessionsPublic(SessionsBase):
@@ -206,16 +209,17 @@ class Players(PlayersBase, table=True):
 
     characters: List["Characters"] = Relationship(back_populates="players", link_model=PlayerCharacterLink)
     games: List["Games"] = Relationship(back_populates="players", link_model=GamePlayersLink)
-
+    sessions: List["Sessions"] = Relationship(back_populates="players", link_model=SessionPlayerLink)
 
 class PlayersCreate(PlayersBase):
     pass
 class PlayersPublic(PlayersBase):
     id: int
     characters: List["CharactersPublic"] = []
-    games: List["GamesPublic"] = []
+    games: List["GamesBase"] = []
 class PlayersUpdate(SQLModel):
     name: str | None = None
+
 
 
 
