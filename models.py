@@ -4,6 +4,8 @@ from sqlalchemy.dialects.postgresql import JSON
 from sqlmodel import Field, Session, SQLModel, create_engine, select, Relationship
 from datetime import date
 
+
+
 class GameCharacterLink(SQLModel, table=True):
     game_id: Optional[int] = Field(default=None, foreign_key="games.id", primary_key=True)
     character_id: Optional[int] = Field(default=None, foreign_key="characters.id", primary_key=True)
@@ -57,8 +59,6 @@ class CharactersBase(SQLModel):
 
     notes: Optional[str] = Field(default=None)
 
-    
-    
 class Characters(CharactersBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
 
@@ -66,17 +66,17 @@ class Characters(CharactersBase, table=True):
     players: List["Players"] = Relationship(back_populates="characters", link_model=PlayerCharacterLink)
     actions: List["Actions"] = Relationship(back_populates="characters", link_model=CharacterActionsLink)
     weapons: List["Weapons"] = Relationship(back_populates="characters", link_model=CharacterWeaponsLink)
-    
- 
 class CharactersCreate(CharactersBase):
     pass
 class CharactersPublic(CharactersBase):
     id: int
-    players: List["PlayersPublic"] = []
+    players: List["PlayersBase"] = []
     games: List["GamesBase"] = []
-    actions: List["ActionsPublic"] = []
-    weapons: List["WeaponsPublic"] = []
-
+    actions: List["ActionsBase"] = []
+    weapons: List["WeaponsBase"] = []
+class CharacterName(SQLModel):
+    name: str 
+    id: int
 class CharactersUpdate(SQLModel):
     name: str | None = None
     c_class: str | None = None
@@ -112,6 +112,7 @@ class ActionsBase(SQLModel):
     damage: int
     attribute: Optional[str] = Field(default=None)
     description: Optional[str] = Field(default=None)
+
 class Actions(ActionsBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True) 
 
@@ -119,6 +120,9 @@ class Actions(ActionsBase, table=True):
 class ActionsCreate(ActionsBase):
     pass
 class ActionsPublic(ActionsBase):
+    id: int
+class ActionName(SQLModel):
+    name: str 
     id: int
 class ActionsUpdate(SQLModel):
     name: str | None = None
@@ -129,13 +133,15 @@ class ActionsUpdate(SQLModel):
     attribute: str | None = None
     description: str | None = None
 
+
 class WeaponsBase(SQLModel):
-    w_name: str = Field(index=True)
+    name: str = Field(index=True)
     w_type: str
     w_range: int
     damage: int
     attribute: Optional[str] = Field(default=None)
     description: Optional[str] = Field(default=None)
+
 class Weapons(WeaponsBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)  
 
@@ -144,33 +150,38 @@ class WeaponsCreate(WeaponsBase):
     pass
 class WeaponsPublic(WeaponsBase):
     id: int
+class WeaponName(SQLModel):
+    name: str 
+    id: int
 class WeaponsUpdate(SQLModel):
-    w_name: str | None = None
+    name: str | None = None
     w_type: str | None = None
     w_range: int | None = None
     damage: int | None = None
     attribute: str | None = None
     description: str | None = None
 
+
 class GamesBase(SQLModel):
     name: str = Field(index=True)
     chartes_pics: str #image
 
-    
 class Games(GamesBase, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)  
+    id: Optional[int] = Field(default=None, primary_key=True)
+
     characters: List["Characters"] = Relationship(back_populates="games", link_model=GameCharacterLink)
     players: List["Players"] = Relationship(back_populates="games", link_model=GamePlayersLink)
     sessions: List["Sessions"] = Relationship(back_populates="games", link_model=GameSessionsLink)
-
-
 class GamesCreate(GamesBase):
     pass
 class GamesPublic(GamesBase):
     id: int
     characters: List["CharactersBase"] = []
-    players: List["PlayersPublic"] = []
-    sessions: List["SessionsPublic"] = []
+    players: List["PlayersBase"] = []
+    sessions: List["SessionsBase"] = []
+class GameName(SQLModel):
+    name: str 
+    id: int
 class GamesUpdate(SQLModel):
     name: str | None = None
     chartes_pics: str | None = None
@@ -186,13 +197,15 @@ class Sessions(SessionsBase, table=True):
 
     players: List["Players"] = Relationship(back_populates="sessions", link_model=SessionPlayerLink)
     games: List["Games"] = Relationship(back_populates="sessions", link_model=GameSessionsLink)
-
 class SessionsCreate(SessionsBase):
     pass
 class SessionsPublic(SessionsBase):
     id: int
-    games: List["GamesPublic"] = []
-    players: List["PlayersPublic"] = []
+    games: List["GamesBase"] = []
+    players: List["PlayersBase"] = []
+class SessionDate(SQLModel):
+    session_date: date 
+    id: int
 class SessionsUpdate(SQLModel):
     name: str | None = None
     session_date: date | None = None
@@ -210,15 +223,18 @@ class Players(PlayersBase, table=True):
     characters: List["Characters"] = Relationship(back_populates="players", link_model=PlayerCharacterLink)
     games: List["Games"] = Relationship(back_populates="players", link_model=GamePlayersLink)
     sessions: List["Sessions"] = Relationship(back_populates="players", link_model=SessionPlayerLink)
-
 class PlayersCreate(PlayersBase):
     pass
 class PlayersPublic(PlayersBase):
     id: int
-    characters: List["CharactersPublic"] = []
+    characters: List["CharactersBase"] = []
     games: List["GamesBase"] = []
+class PlayerName(SQLModel):
+    name: str 
+    id: int
 class PlayersUpdate(SQLModel):
     name: str | None = None
+
 
 
 
