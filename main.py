@@ -282,7 +282,7 @@ def read_player(*, session: Session = Depends(get_session), player_name: str):
         raise HTTPException(status_code=404, detail="Player not found")
     return player
 
-
+#GameCharacterLink
 @app.post("/games/{game_id}/characters/{character_id}", status_code=201)
 def add_character_to_game(
     game_id: int,
@@ -317,20 +317,206 @@ def remove_character_from_game(
     session.delete(link)
     session.commit()
 @app.get("/characters/{character_id}/games", response_model=List[GamesPublic])
-def list_games_for_character(character_id: int, session: Session = Depends(get_session)):
-    results = session.exec(
-        select(Games)
-        .join(GameCharacterLink)
-        .where(GameCharacterLink.character_id == character_id)).all()
-    return results
-@app.get("/characters/{character_id}/games", response_model=List[GamesPublic])
 def get_character_games(character_id: int, session: Session = Depends(get_session)):
     character = session.get(Character, character_id)
     if not character:
         raise HTTPException(status_code=404, detail="Character not found")
     return character.games
+@app.get("/games/{game_id}/characters", response_model=List[GamesPublic])
+def get_game_characters(game_id: int, session: Session = Depends(get_session)):
+    game = session.get(Games, game_id)
+    if not game:
+        raise HTTPException(status_code=404, detail="Game not found")
+    return game.characters
+
+#PlayerCharacterLink
+@app.post("/players/{player_id}/characters/{character_id}", status_code=201)
+def add_character_to_player(
+    player_id: int,
+    character_id: int,
+    session: Session = Depends(get_session)):
+    existing = session.exec(
+        select(PlayerCharacterLink).where(
+            PlayerCharacterLink.player_id == player_id,
+            PlayerCharacterLink.character_id == character_id
+        )
+    ).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Character already linked to player")
+
+    link = PlayerCharacterLink(player_id=player_id, character_id=character_id)
+    session.add(link)
+    session.commit()
+    return {"message": "Character linked to player"}
+@app.delete("/players/{player_id}/characters/{character_id}", status_code=204)
+def remove_character_from_player(
+    player_id: int,
+    character_id: int,
+    session: Session = Depends(get_session)):
+    link = session.exec(
+        select(PlayerCharacterLink).where(
+            PlayerCharacterLink.player_id == player_id,
+            PlayerCharacterLink.character_id == character_id
+        )
+    ).first()
+    if not link:
+        raise HTTPException(status_code=404, detail="Link not found")
+    session.delete(link)
+    session.commit()
+@app.get("/characters/{character_id}/players", response_model=List[PlayersPublic])
+def get_character_players(character_id: int, session: Session = Depends(get_session)):
+    character = session.get(Character, character_id)
+    if not character:
+        raise HTTPException(status_code=404, detail="Character not found")
+    return character.players
+@app.get("/players/{player_id}/characters", response_model=List[PlayersPublic])
+def get_player_characters(player_id: int, session: Session = Depends(get_session)):
+    player = session.get(Players, player_id)
+    if not player:
+        raise HTTPException(status_code=404, detail="Player not found")
+    return player.characters
+
+#GamePlayersLink
+@app.post("/players/{player_id}/games/{game_id}", status_code=201)
+def add_game_to_player(
+    player_id: int,
+    game_id: int,
+    session: Session = Depends(get_session)):
+    existing = session.exec(
+        select(GamePlayersLink).where(
+            GamePlayersLink.player_id == player_id,
+            GamePlayersLink.game_id == game_id
+        )
+    ).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Game already linked to player")
+
+    link = GamePlayersLink(player_id=player_id, game_id=game_id)
+    session.add(link)
+    session.commit()
+    return {"message": "Game linked to player"}
+@app.delete("/players/{player_id}/games/{game_id}", status_code=204)
+def remove_game_from_player(
+    player_id: int,
+    game_id: int,
+    session: Session = Depends(get_session)):
+    link = session.exec(
+        select(GamePlayersLink).where(
+            GamePlayersLink.player_id == player_id,
+            GamePlayersLink.game_id == game_id
+        )
+    ).first()
+    if not link:
+        raise HTTPException(status_code=404, detail="Link not found")
+    session.delete(link)
+    session.commit()
+@app.get("/games/{game_id}/players", response_model=List[PlayersPublic])
+def get_game_players(game_id: int, session: Session = Depends(get_session)):
+    game = session.get(Games, game_id)
+    if not game:
+        raise HTTPException(status_code=404, detail="Game not found")
+    return game.players
+@app.get("/players/{player_id}/games", response_model=List[PlayersPublic])
+def get_player_games(player_id: int, session: Session = Depends(get_session)):
+    player = session.get(Players, player_id)
+    if not player:
+        raise HTTPException(status_code=404, detail="Player not found")
+    return player.games
+
+#CharacterActionsLink
+@app.post("/characters/{character_id}/actions/{action_id}", status_code=201)
+def add_action_to_character(
+    character_id: int,
+    action_id: int,
+    session: Session = Depends(get_session)):
+    existing = session.exec(
+        select(CharacterActionsLink).where(
+            CharacterActionsLink.character_id == character_id,
+            CharacterActionsLink.action_id == action_id
+        )
+    ).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Action already linked to character")
+
+    link = CharacterActionsLink(character_id=character_id, action_id=action_id)
+    session.add(link)
+    session.commit()
+    return {"message": "Action linked to character"}
+@app.delete("/characters/{character_id}/actions/{action_id}", status_code=204)
+def remove_action_from_character(
+    character_id: int,
+    action_id: int,
+    session: Session = Depends(get_session)):
+    link = session.exec(
+        select(CharacterActionsLink).where(
+            CharacterActionsLink.character_id == character_id,
+            CharacterActionsLink.action_id == action_id
+        )
+    ).first()
+    if not link:
+        raise HTTPException(status_code=404, detail="Link not found")
+    session.delete(link)
+    session.commit()
+@app.get("/actions/{action_id}/characters", response_model=List[CharactersPublic])
+def get_action_characters(action_id: int, session: Session = Depends(get_session)):
+    action = session.get(Actions, action_id)
+    if not action:
+        raise HTTPException(status_code=404, detail="Action not found")
+    return action.characters
+@app.get("/characters/{character_id}/actions", response_model=List[CharactersPublic])
+def get_character_actions(character_id: int, session: Session = Depends(get_session)):
+    character = session.get(Characters, character_id)
+    if not character:
+        raise HTTPException(status_code=404, detail="Character not found")
+    return character.actions
 
 
+#CharacterWeaponsLink
+@app.post("/characters/{character_id}/weapons/{weapon_id}", status_code=201)
+def add_weapon_to_character(
+    character_id: int,
+    weapon_id: int,
+    session: Session = Depends(get_session)):
+    existing = session.exec(
+        select(CharacterWeaponsLink).where(
+            CharacterWeaponsLink.character_id == character_id,
+            CharacterWeaponsLink.weapon_id == weapon_id
+        )
+    ).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Weapon already linked to character")
+
+    link = CharacterWeaponsLink(character_id=character_id, weapon_id=weapon_id)
+    session.add(link)
+    session.commit()
+    return {"message": "Weapon linked to character"}
+@app.delete("/characters/{character_id}/weapons/{weapon_id}", status_code=204)
+def remove_weapon_from_character(
+    character_id: int,
+    weapon_id: int,
+    session: Session = Depends(get_session)):
+    link = session.exec(
+        select(CharacterWeaponsLink).where(
+            CharacterWeaponsLink.character_id == character_id,
+            CharacterWeaponsLink.weapon_id == weapon_id
+        )
+    ).first()
+    if not link:
+        raise HTTPException(status_code=404, detail="Link not found")
+    session.delete(link)
+    session.commit()
+@app.get("/weapons/{weapon_id}/characters", response_model=List[CharactersPublic])
+def get_weapon_characters(weapon_id: int, session: Session = Depends(get_session)):
+    weapon = session.get(Weapons, weapon_id)
+    if not weapon:
+        raise HTTPException(status_code=404, detail="Weapon not found")
+    return weapon.characters
+@app.get("/characters/{character_id}/weapons", response_model=List[CharactersPublic])
+def get_character_weapons(character_id: int, session: Session = Depends(get_session)):
+    character = session.get(Characters, character_id)
+    if not character:
+        raise HTTPException(status_code=404, detail="Character not found")
+    return character.weapons
 
 @app.get("/")
 def read_root():
