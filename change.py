@@ -1,6 +1,0 @@
-CharactersPublic.model_rebuild()
-ActionsPublic.model_rebuild()
-WeaponsPublic.model_rebuild()
-PlayersPublic.model_rebuild()
-SessionsPublic.model_rebuild()
-GamesPublic.model_rebuild()
